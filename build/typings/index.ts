@@ -41,12 +41,12 @@ export interface AbstractNode {
 export interface IconDefinition extends AbstractNode {
   name: string; // kebab-case-style
   theme: ThemeType;
-  nameWithTheme: string;
 }
 
 export interface IconDefinitionGetter {
   (primaryColor: string, secondaryColor: string): IconDefinition;
-  nameWithTheme: string;
+  name: string; // kebab-case-style
+  theme: ThemeType;
 }
 
 export interface NameAndPath {

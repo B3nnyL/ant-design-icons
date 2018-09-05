@@ -4,18 +4,17 @@ import _ = require('lodash');
 import parse5 = require('parse5');
 import path = require('path');
 import Prettier = require('prettier');
-import { from, Observable, of } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { concat, filter, map, mergeMap, reduce } from 'rxjs/operators';
 import SVGO = require('svgo');
 import {
   EXPORT_DEFAULT_COMPONENT_FROM_DIR,
   EXPORT_DEFAULT_MANIFEST,
-  EXPORT_DEFAULT_MAPPER,
-  getManulMapper,
   ICON_GETTER_FUNCTION,
   ICON_IDENTIFIER,
   ICON_JSON,
-  NAME_WITH_THEME
+  TWO_TONE_NAME,
+  TWO_TONE_THEME
 } from './constants';
 import {
   BuildTimeIconMetaData,
@@ -31,15 +30,21 @@ import {
   clear,
   generateAbstractTree,
   getIdentifier,
-  getRollbackTheme,
   isAccessable,
   log,
   withSuffix
 } from './utils';
 import { normalize } from './utils/normalizeNames';
 
+/**
+ * Process and minimize the svg files from the /svg directory.
+ * Generate the JSON data to the /src directory.
+ * @param env build environment variables
+ */
 export async function build(env: Environment) {
   const svgo = new SVGO(env.options.svgo);
+
+  // Single theme means that dont need the property 'fill' in the path element.
   const singleType: ThemeType[] = ['fill', 'outline'];
   const svgoForSingleIcon = new SVGO({
     ...env.options.svgo,
@@ -50,8 +55,10 @@ export async function build(env: Environment) {
     ]
   });
 
+  // remove and delete all old output files.
   await clear(env);
 
+  // rename all the svg files' names.
   const svgBasicNames = await normalize(env);
 
   // SVG Meta Data Flow
@@ -91,7 +98,6 @@ export async function build(env: Environment) {
             const icon: IconDefinition = {
               name: kebabCaseName,
               theme,
-              nameWithTheme: withSuffix(kebabCaseName, theme),
               ...generateAbstractTree(
                 (parse5.parseFragment(data) as any).childNodes[0] as Node,
                 kebabCaseName
@@ -118,6 +124,7 @@ export async function build(env: Environment) {
       BuildTimeIconMetaData,
       { identifier: string; content: string; theme: ThemeType }
     >(({ identifier, icon }) => {
+      // In some twotone icons, the designer didn't set the primary color path fill.
       if (icon.theme === 'twotone') {
         icon = _.cloneDeep(icon);
         icon.children.forEach((pathElment) => {
@@ -134,7 +141,7 @@ export async function build(env: Environment) {
                   .replace(ICON_IDENTIFIER, identifier)
                   .replace(
                     ICON_GETTER_FUNCTION,
-                    `function ${identifier}(primaryColor: string, secondaryColor: string) { return ${JSON.stringify(
+                    `function (primaryColor: string, secondaryColor: string) { return ${JSON.stringify(
                       icon
                     )
                       .replace(/"#333"/g, 'primaryColor')
@@ -142,8 +149,9 @@ export async function build(env: Environment) {
                       .replace(/"#D9D9D9"/g, 'secondaryColor')
                       .replace(/"#D8D8D8"/g, 'secondaryColor')}; }`
                   )
-                  .replace(NAME_WITH_THEME, icon.nameWithTheme),
-                env.options.prettier
+                  .replace(TWO_TONE_NAME, icon.name)
+                  .replace(TWO_TONE_THEME, icon.theme),
+                { ...env.options.prettier, parser: 'typescript' }
               )
             : Prettier.format(
                 iconTsTemplate

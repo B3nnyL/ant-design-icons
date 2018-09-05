@@ -2,7 +2,7 @@
 // tslint:disable
 
 import { IconDefinitionGetter } from '../types';
-const temp: any = <% ICON_GETTER_FUNCTION %>;
-temp.nameWithTheme = '<% NAME_WITH_THEME %>';
-const <% ICON_IDENTIFIER %>: IconDefinitionGetter = temp;
-export default <% ICON_IDENTIFIER %>;
+const <% ICON_IDENTIFIER %>: any = <% ICON_GETTER_FUNCTION %>;
+<% ICON_IDENTIFIER %>.name = '<% TWO_TONE_NAME %>';
+<% ICON_IDENTIFIER %>.theme = '<% TWO_TONE_THEME %>';
+export default <% ICON_IDENTIFIER %> as IconDefinitionGetter;

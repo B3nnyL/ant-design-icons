@@ -8,7 +8,8 @@ export const ICON_IMPORT_PATH = /<% ICON_IMPORT_PATH %>/g;
 export const EXPORT_DEFAULT_COMPONENT_FROM_DIR = /<% EXPORT_DEFAULT_COMPONENT_FROM_DIR %>/g;
 export const EXPORT_DEFAULT_MANIFEST = /<% EXPORT_DEFAULT_MANIFEST %>/g;
 export const EXPORT_DEFAULT_MAPPER = /<% EXPORT_DEFAULT_MAPPER %>/g;
-export const NAME_WITH_THEME = /<% NAME_WITH_THEME %>/g;
+export const TWO_TONE_NAME = /<% TWO_TONE_NAME %>/g;
+export const TWO_TONE_THEME = /<% TWO_TONE_THEME %>/g;
 
 // manul map
 export function getManulMapper(
